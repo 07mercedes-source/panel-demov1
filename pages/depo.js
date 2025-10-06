@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Depo({ userName }) {
+  const router = useRouter();
+
   const [products, setProducts] = useState([
     { id: 1, name: 'Ürün A', quantity: 50, cost: 10, price: 15, expiry: '2025-12-31' },
     { id: 2, name: 'Ürün B', quantity: 20, cost: 5, price: 8, expiry: '2025-11-30' }
@@ -22,6 +25,17 @@ export default function Depo({ userName }) {
     }
   };
 
+  const editProduct = (id) => {
+    const product = products.find(p => p.id === id);
+    if(!product) return;
+    const name = prompt('Ürün adı:', product.name);
+    const quantity = parseInt(prompt('Miktar:', product.quantity), 10);
+    const cost = parseFloat(prompt('Maliyet (€):', product.cost));
+    const price = parseFloat(prompt('Satış (€):', product.price));
+    const expiry = prompt('Son kullanma tarihi (YYYY-MM-DD):', product.expiry);
+    setProducts(products.map(p => p.id === id ? { id, name, quantity, cost, price, expiry } : p));
+  };
+
   const buttonStyle = { padding: '6px 12px', margin: '4px', borderRadius: '6px', border: 'none', cursor: 'pointer', backgroundColor: '#3b82f6', color: 'white' };
   const deleteStyle = { ...buttonStyle, backgroundColor: '#ef4444' };
 
@@ -29,6 +43,8 @@ export default function Depo({ userName }) {
     <div style={{ padding: 24 }}>
       <h2>Depo Modülü</h2>
       {isAdmin && <button style={buttonStyle} onClick={addProduct}>Yeni Ürün Ekle</button>}
+      <button style={buttonStyle} onClick={() => router.push('/depo-teslim')}>Teslim Alma</button>
+      <button style={buttonStyle} onClick={() => router.push('/depo-cikis')}>Ürün Çıkışı</button>
       <div className="card" style={{ marginTop: 16 }}>
         <table>
           <thead>
@@ -51,4 +67,17 @@ export default function Depo({ userName }) {
                 <td>{p.cost.toFixed(2)}</td>
                 <td>{p.price.toFixed(2)}</td>
                 <td>{p.expiry}</td>
-                {isAdmin && <td><button style={deleteStyle} onClick={() => deleteProduct(p.id)}>Sil</button></td>}
+                {isAdmin && (
+                  <td>
+                    <button style={buttonStyle} onClick={() => editProduct(p.id)}>Düzenle</button>
+                    <button style={deleteStyle} onClick={() => deleteProduct(p.id)}>Sil</button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
