@@ -11,8 +11,7 @@ export default function Depo({ userName }) {
 
   const isAdmin = userName === 'Ali Veli';
 
-  const deleteProduct = (id) => setProducts(products.filter(p => p.id !== id));
-
+  // Ürün ekleme
   const addProduct = () => {
     const newId = products.length + 1;
     const name = prompt('Ürün adı:');
@@ -25,6 +24,7 @@ export default function Depo({ userName }) {
     }
   };
 
+  // Ürün düzenleme
   const editProduct = (id) => {
     const product = products.find(p => p.id === id);
     if(!product) return;
@@ -36,48 +36,20 @@ export default function Depo({ userName }) {
     setProducts(products.map(p => p.id === id ? { id, name, quantity, cost, price, expiry } : p));
   };
 
+  // Ürün silme
+  const deleteProduct = (id) => {
+    if(confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+      setProducts(products.filter(p => p.id !== id));
+    }
+  };
+
   const buttonStyle = { padding: '6px 12px', margin: '4px', borderRadius: '6px', border: 'none', cursor: 'pointer', backgroundColor: '#3b82f6', color: 'white' };
   const deleteStyle = { ...buttonStyle, backgroundColor: '#ef4444' };
 
   return (
     <div style={{ padding: 24 }}>
       <h2>Depo Modülü</h2>
+      
       {isAdmin && <button style={buttonStyle} onClick={addProduct}>Yeni Ürün Ekle</button>}
       <button style={buttonStyle} onClick={() => router.push('/depo-teslim')}>Teslim Alma</button>
-      <button style={buttonStyle} onClick={() => router.push('/depo-cikis')}>Ürün Çıkışı</button>
-      <div className="card" style={{ marginTop: 16 }}>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Ürün</th>
-              <th>Miktar</th>
-              <th>Maliyet (€)</th>
-              <th>Satış (€)</th>
-              <th>Son Kullanma</th>
-              {isAdmin && <th>İşlem</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.name}</td>
-                <td>{p.quantity}</td>
-                <td>{p.cost.toFixed(2)}</td>
-                <td>{p.price.toFixed(2)}</td>
-                <td>{p.expiry}</td>
-                {isAdmin && (
-                  <td>
-                    <button style={buttonStyle} onClick={() => editProduct(p.id)}>Düzenle</button>
-                    <button style={deleteStyle} onClick={() => deleteProduct(p.id)}>Sil</button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+      <butt
