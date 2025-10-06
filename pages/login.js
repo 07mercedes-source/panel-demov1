@@ -1,26 +1,24 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 
-export default function Login() {
+export default function Login({ setUserName }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
   function handleSubmit(e) {
     e.preventDefault();
-
     let displayName = '';
     if ((username === 'admin' || username === 'muhasebe' || username === 'personel') && password === '12345') {
-      // Kullanıcı adı ve rol belirleme (demo)
       if (username === 'admin') displayName = 'Ali Veli';
       else if (username === 'muhasebe') displayName = 'Ayşe Yılmaz';
       else displayName = 'Mehmet Kaya';
 
-      // Dashboard'a yönlendirirken query ile gönder
-      router.push({
-        pathname: '/dashboard',
-        query: { name: displayName }
-      });
+      // localStorage ve _app.js state güncelle
+      localStorage.setItem('userName', displayName);
+      if (setUserName) setUserName(displayName);
+
+      router.push('/dashboard');
     } else {
       alert('Kullanıcı adı veya şifre hatalı');
     }
