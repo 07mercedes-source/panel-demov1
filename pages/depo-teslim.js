@@ -8,12 +8,26 @@ export default function DepoTeslim() {
     { id: 2, name: 'Ürün B', quantity: 20 }
   ]);
 
+  const [history, setHistory] = useState([]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const id = parseInt(e.target.id.value, 10);
     const qty = parseInt(e.target.quantity.value, 10);
+
+    const product = products.find(p => p.id === id);
+    if(!product) {
+      alert('Ürün bulunamadı!');
+      return;
+    }
+
+    // Stok güncelle
     setProducts(products.map(p => p.id === id ? { ...p, quantity: p.quantity + qty } : p));
-    alert('Depo stoğu güncellendi!');
+
+    // Geçmiş kaydı
+    const date = new Date().toLocaleString('de-DE', { hour12: false });
+    setHistory([...history, { id, name: product.name, type: 'Giriş', quantity: qty, date }]);
+
     e.target.reset();
   };
 
@@ -22,34 +36,11 @@ export default function DepoTeslim() {
   return (
     <div style={{ padding: 24 }}>
       <h2>Depo Teslim Alma</h2>
-      <form onSubmit={handleSubmit} className="card" style={{ padding: 16 }}>
-        <label>Ürün ID: 
-          <input type="number" name="id" required />
-        </label>
-        <label style={{ marginLeft: 10 }}>Miktar: 
-          <input type="number" name="quantity" required />
-        </label>
+
+      <form onSubmit={handleSubmit} className="card" style={{ padding: 16, marginBottom: 16 }}>
+        <label>Ürün ID: <input type="number" name="id" required /></label>
+        <label style={{ marginLeft: 10 }}>Miktar: <input type="number" name="quantity" required /></label>
         <button style={buttonStyle} type="submit">Stok Güncelle</button>
       </form>
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>Güncel Stok</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Ürün</th><th>Miktar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.name}</td>
-                <td>{p.quantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+
+      <div className="card" style={{ marginTop
