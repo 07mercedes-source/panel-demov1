@@ -7,16 +7,15 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [userName, setUserName] = useState('');
 
-  // localStorage'dan kullanıcı adını al
   useEffect(() => {
     const storedName = localStorage.getItem('userName');
     if (storedName) setUserName(storedName);
-    else if (router.pathname !== '/login') router.push('/login'); // login değilse ve kullanıcı yoksa yönlendir
+    else if (router.pathname !== '/login') router.push('/login');
   }, [router]);
 
   return (
     <>
-      <Navbar userName={userName} />
+      <Navbar userName={userName} setUserName={setUserName} />
       <Component {...pageProps} setUserName={setUserName} />
     </>
   );
