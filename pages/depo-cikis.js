@@ -1,93 +1,166 @@
 import { useState } from 'react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { useRouter } from 'next/router';
 
 export default function DepoCikis() {
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Ürün A', quantity: 50 },
-    { id: 2, name: 'Ürün B', quantity: 20 }
-  ]);
+  const router = useRouter();
+  const [productId, setProductId] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [restaurant, setRestaurant] = useState('');
+  const [log, setLog] = useState([]);
 
-  const [history, setHistory] = useState([]);
+  const buttonStyle = {
+    marginRight: '10px',
+    padding: '8px 14px',
+    backgroundColor: '#1e40af',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer'
+  };
+
+  // Basit irsaliye numarası üretici
+  const generateInvoiceNo = () => {
+    return 'IRS' + Math.floor(Math.random() * 1000000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const id = parseInt(e.target.id.value, 10);
-    const qty = parseInt(e.target.quantity.value, 10);
-    const target = e.target.target.value;
-
-    const product = products.find(p => p.id === id);
-    if(!product || qty > product.quantity) {
-      alert('Stokta yeterli ürün yok!');
-      return;
-    }
-
-    // Stok güncelle
-    setProducts(products.map(p => p.id === id ? { ...p, quantity: p.quantity - qty } : p));
-
-    // Geçmiş kaydı
-    const date = new Date().toLocaleString('de-DE', { hour12: false });
-    const record = { id, name: product.name, quantity: qty, target, date };
-    setHistory([...history, record]);
-
-    // Sevk irsaliyesi PDF
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Sevk İrsaliyesi', 14, 20);
-    doc.text(`Tarih: ${date}`, 14, 28);
-    doc.text(`Hedef: ${target}`, 14, 36);
-
-    doc.autoTable({
-      startY: 45,
-      head: [['ID', 'Ürün', 'Miktar']],
-      body: [[record.id, record.name, record.quantity]],
-    });
-
-    doc.save(`Sevk_Irsaliyesi_${date.replace(/[: ]/g,'_')}.pdf`);
-    e.target.reset();
+    if (!productId || !quantity || !restaurant) return;
+    const newEntry = {
+      id: productId,
+      quantity: Number(quantity),
+      restaurant,
+      invoiceNo: generateInvoiceNo(),
+      date: new Date().toLocaleString('de-DE')
+    };
+    setLog([...log, newEntry]);
+    setProductId('');
+    setQuantity('');
+    setRestaurant('');
   };
 
-  const buttonStyle = { padding: '6px 12px', margin: '4px', borderRadius: '6px', border: 'none', cursor: 'pointer', backgroundColor: '#3b82f6', color: 'white' };
+  const handlePrintInvoice = (entry) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Sevk İrsaliyesi ${entry.invoiceNo}</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            h1 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+            .footer { margin-top: 40px; text-align: right; }
+          </style>
+        </head>
+        <body>
+          <h1>🚚 Sevk İrsaliyesi</h1>
+          <p><strong>İrsaliye No:</strong> ${entry.invoiceNo}</p>
+          <p><strong>Tarih:</strong> ${entry.date}</p>
+          <p><strong>Gönderilen Yer:</strong> ${entry.restaurant}</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Ürün ID</th>
+                <th>Miktar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${entry.id}</td>
+                <td>${entry.quantity}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>İmza / Kaşe ________________________</p>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Depo Çıkışı / Sevkiyat</h2>
+    <div style={{ padding: '20px' }}>
+      <h1>📦 Depo Çıkışı</h1>
 
-      <form onSubmit={handleSubmit} className="card" style={{ padding: 16, marginBottom: 16 }}>
-        <label>Ürün ID: <input type="number" name="id" required /></label>
-        <label style={{ marginLeft: 10 }}>Miktar: <input type="number" name="quantity" required /></label>
-        <label style={{ marginLeft: 10 }}>Hedef: <input type="text" name="target" required /></label>
-        <button style={buttonStyle} type="submit">Stoktan Düş & Sevk İrsaliyesi</button>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+        <input
+          type="number"
+          placeholder="Ürün ID"
+          value={productId}
+          onChange={(e) => setProductId(e.target.value)}
+          style={{ marginRight: '8px', padding: '5px' }}
+        />
+        <input
+          type="number"
+          placeholder="Miktar"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          style={{ marginRight: '8px', padding: '5px' }}
+        />
+        <select
+          value={restaurant}
+          onChange={(e) => setRestaurant(e.target.value)}
+          style={{ marginRight: '8px', padding: '5px' }}
+        >
+          <option value="">Restaurant Seç</option>
+          <option value="Restaurant 1">Restaurant 1</option>
+          <option value="Restaurant 2">Restaurant 2</option>
+        </select>
+
+        <button style={buttonStyle} type="submit">Çıkış Kaydet</button>
+        <button
+          type="button"
+          style={{ ...buttonStyle, backgroundColor: '#64748b' }}
+          onClick={() => router.push('/depo')}
+        >
+          Geri Dön
+        </button>
       </form>
 
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>Güncel Stok</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f1f5f9' }}>
-            <tr>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>ID</th>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>Ürün</th>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>Miktar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.id}>
-                <td style={{ padding: 8, border: '1px solid #cbd5e1' }}>{p.id}</td>
-                <td style={{ padding: 8, border: '1px solid #cbd5e1' }}>{p.name}</td>
-                <td style={{ padding: 8, border: '1px solid #cbd5e1' }}>{p.quantity}</td>
+      <div className="card" style={{ marginTop: '20px', background: '#f8fafc', padding: '10px', borderRadius: '8px' }}>
+        <h3>📋 Çıkış Kayıtları</h3>
+        {log.length === 0 ? (
+          <p>Henüz çıkış kaydı yok.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>İrsaliye No</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Ürün ID</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Miktar</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Restaurant</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Tarih</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>İşlem</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {log.map((entry, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.invoiceNo}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.id}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.quantity}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.restaurant}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.date}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>
+                    <button
+                      style={{ padding: '4px 8px', backgroundColor: '#15803d', color: '#fff', border: 'none', borderRadius: '4px' }}
+                      onClick={() => handlePrintInvoice(entry)}
+                    >
+                      İrsaliye Yazdır
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>Çıkış Geçmişi</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f1f5f9' }}>
-            <tr>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>ID</th>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>Ürün</th>
-              <th style={{ padding: 8, border: '1px solid #cbd5e1' }}>Miktar</th>
-              <
+    </div>
+  );
+}
