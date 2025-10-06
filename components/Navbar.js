@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Navbar({ userName, setUserName }) {
   const router = useRouter();
   const [currentTime, setCurrentTime] = useState('');
   const [lastActivity, setLastActivity] = useState(Date.now());
+  const [depoMenuOpen, setDepoMenuOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -41,8 +42,8 @@ export default function Navbar({ userName, setUserName }) {
   const goTo = (path) => router.push(path);
 
   const buttonStyle = {
-    padding: '8px 14px',
-    margin: '0 6px',
+    padding: '6px 14px',
+    margin: '0 4px',
     borderRadius: '6px',
     border: 'none',
     cursor: 'pointer',
@@ -53,17 +54,30 @@ export default function Navbar({ userName, setUserName }) {
 
   const logoutStyle = { ...buttonStyle, backgroundColor: '#ef4444' };
 
+  const menuStyle = {
+    position: 'absolute',
+    top: '36px',
+    left: 0,
+    background: '#f1f5f9',
+    color: '#1e293b',
+    borderRadius: '6px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    zIndex: 10
+  };
+
+  const menuItemStyle = {
+    padding: '6px 12px',
+    cursor: 'pointer',
+    borderBottom: '1px solid #cbd5e1'
+  };
+
   return (
-    <nav style={{ padding: 16, background: '#1e293b', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+    <nav style={{ padding: 16, background: '#1e293b', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', flexWrap: 'wrap' }}>
       <div><strong>Hoşgeldiniz, {userName || 'Kullanıcı'}</strong></div>
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+
+      <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
         <button style={buttonStyle} onClick={() => goTo('/dashboard')}>Dashboard</button>
-        <button style={buttonStyle} onClick={() => goTo('/depo')}>Depo</button>
-        <button style={buttonStyle} onClick={() => goTo('/ik')}>İK</button>
-        <button style={buttonStyle} onClick={() => goTo('/restaurant')}>Restaurant</button>
-        <button style={logoutStyle} onClick={handleLogout}>Çıkış</button>
-      </div>
-      <div>{currentTime}</div>
-    </nav>
-  );
-}
+
+        {/* Depo Açılır Menü */}
+        <div style={{ position: 'relative' }}>
+          <button style={buttonStyle} onClick={() => setDepoMenuOpen(!depoMenuOpen)}>Depo ▼</button>
