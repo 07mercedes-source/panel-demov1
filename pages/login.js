@@ -8,9 +8,19 @@ export default function Login() {
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    let displayName = '';
     if ((username === 'admin' || username === 'muhasebe' || username === 'personel') && password === '12345') {
-      // Login başarılı → dashboard'a yönlendir
-      router.push('/dashboard'); // dashboard sayfan varsa
+      // Kullanıcı adı ve rol belirleme (demo)
+      if (username === 'admin') displayName = 'Ali Veli';
+      else if (username === 'muhasebe') displayName = 'Ayşe Yılmaz';
+      else displayName = 'Mehmet Kaya';
+
+      // Dashboard'a yönlendirirken query ile gönder
+      router.push({
+        pathname: '/dashboard',
+        query: { name: displayName }
+      });
     } else {
       alert('Kullanıcı adı veya şifre hatalı');
     }
