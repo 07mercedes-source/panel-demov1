@@ -1,0 +1,10 @@
+panel-demo/
+├─ pages/
+│  ├─ index.js
+│  ├─ login.js
+│  ├─ depo.js
+│  ├─ ik.js
+│  └─ restoran.js
+├─ public/
+├─ package.json
+└─ README.md
