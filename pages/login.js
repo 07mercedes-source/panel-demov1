@@ -1,20 +1,16 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+  const router = useRouter();
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Basit demo auth
     if ((username === 'admin' || username === 'muhasebe' || username === 'personel') && password === '12345') {
-      // role belirleme (sadece demo)
-      if (username === 'admin') setRole('Yönetici');
-      else if (username === 'muhasebe') setRole('Muhasebe');
-      else setRole('Personel');
-
-      alert(`Giriş başarılı! Rol: ${role}`);
+      // Login başarılı → dashboard'a yönlendir
+      router.push('/dashboard'); // dashboard sayfan varsa
     } else {
       alert('Kullanıcı adı veya şifre hatalı');
     }
