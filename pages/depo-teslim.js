@@ -3,44 +3,87 @@ import { useRouter } from 'next/router';
 
 export default function DepoTeslim() {
   const router = useRouter();
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Ürün A', quantity: 50 },
-    { id: 2, name: 'Ürün B', quantity: 20 }
-  ]);
+  const [productId, setProductId] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [log, setLog] = useState([]);
 
-  const [history, setHistory] = useState([]);
+  const buttonStyle = {
+    marginRight: '10px',
+    padding: '8px 14px',
+    backgroundColor: '#1e40af',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer'
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const id = parseInt(e.target.id.value, 10);
-    const qty = parseInt(e.target.quantity.value, 10);
-
-    const product = products.find(p => p.id === id);
-    if(!product) {
-      alert('Ürün bulunamadı!');
-      return;
-    }
-
-    // Stok güncelle
-    setProducts(products.map(p => p.id === id ? { ...p, quantity: p.quantity + qty } : p));
-
-    // Geçmiş kaydı
-    const date = new Date().toLocaleString('de-DE', { hour12: false });
-    setHistory([...history, { id, name: product.name, type: 'Giriş', quantity: qty, date }]);
-
-    e.target.reset();
+    if (!productId || !quantity) return;
+    const newEntry = {
+      id: productId,
+      quantity: Number(quantity),
+      date: new Date().toLocaleString('de-DE') // Almanya formatında tarih
+    };
+    setLog([...log, newEntry]);
+    setProductId('');
+    setQuantity('');
   };
 
-  const buttonStyle = { padding: '6px 12px', margin: '4px', borderRadius: '6px', border: 'none', cursor: 'pointer', backgroundColor: '#3b82f6', color: 'white' };
-
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Depo Teslim Alma</h2>
+    <div style={{ padding: '20px' }}>
+      <h1>📝 Ürün Teslim Alma</h1>
 
-      <form onSubmit={handleSubmit} className="card" style={{ padding: 16, marginBottom: 16 }}>
-        <label>Ürün ID: <input type="number" name="id" required /></label>
-        <label style={{ marginLeft: 10 }}>Miktar: <input type="number" name="quantity" required /></label>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+        <input
+          type="number"
+          placeholder="Ürün ID"
+          value={productId}
+          onChange={(e) => setProductId(e.target.value)}
+          style={{ marginRight: '8px', padding: '5px' }}
+        />
+        <input
+          type="number"
+          placeholder="Miktar"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          style={{ marginRight: '8px', padding: '5px' }}
+        />
         <button style={buttonStyle} type="submit">Stok Güncelle</button>
+        <button
+          type="button"
+          style={{ ...buttonStyle, backgroundColor: '#64748b' }}
+          onClick={() => router.push('/depo')}
+        >
+          Geri Dön
+        </button>
       </form>
 
-      <div className="card" style={{ marginTop
+      <div className="card" style={{ marginTop: '20px', background: '#f8fafc', padding: '10px', borderRadius: '8px' }}>
+        <h3>📋 Teslim Kayıtları</h3>
+        {log.length === 0 ? (
+          <p>Henüz teslim kaydı yok.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Ürün ID</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Miktar</th>
+                <th style={{ border: '1px solid #ccc', padding: '6px' }}>Tarih</th>
+              </tr>
+            </thead>
+            <tbody>
+              {log.map((entry, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.id}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.quantity}</td>
+                  <td style={{ border: '1px solid #ccc', padding: '6px' }}>{entry.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
