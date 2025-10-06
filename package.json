@@ -2,10 +2,12 @@
   "name": "panel-demo",
   "version": "1.0.0",
   "private": true,
+  "description": "EMSAL GmbH - Demo panel uygulaması",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "14.2.3",
@@ -14,5 +16,10 @@
     "xlsx": "^0.18.5",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2"
-  }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "EMSAL GmbH",
+  "license": "MIT"
 }
