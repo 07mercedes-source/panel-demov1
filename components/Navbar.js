@@ -6,7 +6,6 @@ export default function Navbar({ userName, setUserName }) {
   const [currentTime, setCurrentTime] = useState('');
   const [lastActivity, setLastActivity] = useState(Date.now());
 
-  // Tarih ve saat güncelleme
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -15,7 +14,6 @@ export default function Navbar({ userName, setUserName }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Kullanıcı hareketi ile timer sıfırlama
   useEffect(() => {
     const resetTimer = () => setLastActivity(Date.now());
     window.addEventListener('mousemove', resetTimer);
@@ -23,9 +21,7 @@ export default function Navbar({ userName, setUserName }) {
     window.addEventListener('click', resetTimer);
 
     const checkTimeout = setInterval(() => {
-      if (Date.now() - lastActivity > 15 * 60 * 1000) { // 15 dk
-        handleLogout();
-      }
+      if (Date.now() - lastActivity > 15 * 60 * 1000) handleLogout();
     }, 1000);
 
     return () => {
@@ -36,17 +32,36 @@ export default function Navbar({ userName, setUserName }) {
     };
   }, [lastActivity]);
 
-  function handleLogout() {
+  const handleLogout = () => {
     localStorage.removeItem('userName');
     if (setUserName) setUserName('');
     router.push('/login');
-  }
+  };
+
+  const goTo = (path) => router.push(path);
+
+  const buttonStyle = {
+    padding: '8px 14px',
+    margin: '0 6px',
+    borderRadius: '6px',
+    border: 'none',
+    cursor: 'pointer',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    transition: '0.2s'
+  };
+
+  const logoutStyle = { ...buttonStyle, backgroundColor: '#ef4444' };
 
   return (
-    <nav style={{ padding: 16, background: '#1e293b', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
-        Hoşgeldiniz, {userName || 'Kullanıcı'}
-        <button onClick={handleLogout} style={{ marginLeft: 16, padding: '4px 8px' }}>Çıkış</button>
+    <nav style={{ padding: 16, background: '#1e293b', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div><strong>Hoşgeldiniz, {userName || 'Kullanıcı'}</strong></div>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+        <button style={buttonStyle} onClick={() => goTo('/dashboard')}>Dashboard</button>
+        <button style={buttonStyle} onClick={() => goTo('/depo')}>Depo</button>
+        <button style={buttonStyle} onClick={() => goTo('/ik')}>İK</button>
+        <button style={buttonStyle} onClick={() => goTo('/restaurant')}>Restaurant</button>
+        <button style={logoutStyle} onClick={handleLogout}>Çıkış</button>
       </div>
       <div>{currentTime}</div>
     </nav>
